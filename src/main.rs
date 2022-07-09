@@ -1,4 +1,4 @@
-mod grid;
+    mod grid;
 mod lexer;
 
 use grid::{draw_axis, draw_grid};
@@ -16,16 +16,11 @@ fn x() {
     println!("c: {calc}");
 }
 
-#[test]
-fn test_find_tokens() {
-    //let input = "y = x^2 + x - sin(x) / e^x";
-    let input = "x + 3";
-    find_tokens(input);
-}
-
 #[macroquad::main("runthrough")]
 async fn main() {
-    
+    let input = "x + 3";
+    find_tokens(input);
+
     loop {
         clear_background(WHITE);
 
