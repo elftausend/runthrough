@@ -1,23 +1,37 @@
 mod grid;
+mod lexer;
 
 use grid::{draw_axis, draw_grid};
-use macroquad::prelude::{
-    clear_background, next_frame, WHITE,
-};
+use lexer::find_tokens;
+use macroquad::prelude::{clear_background, next_frame, WHITE};
 
 const EDGE_DISTANCE: f32 = 40.;
 const AXIS_THICKNESS: f32 = 3.;
 const SPACINGX: f32 = 40.;
 const SPACINGY: f32 = 40.;
 
+#[test]
+fn x() {
+    let calc = 2. + 2. / (1. + 2.);
+    println!("c: {calc}");
+}
+
+#[test]
+fn test_find_tokens() {
+    //let input = "y = x^2 + x - sin(x) / e^x";
+    let input = "x + 3";
+    find_tokens(input);
+}
+
 #[macroquad::main("runthrough")]
 async fn main() {
+    
     loop {
         clear_background(WHITE);
 
         draw_grid();
         draw_axis();
-        
+
         next_frame().await;
     }
 }

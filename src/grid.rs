@@ -1,6 +1,6 @@
-use macroquad::prelude::{draw_line, screen_height, screen_width, DARKGRAY, GRAY, GREEN};
+use macroquad::prelude::{draw_line, screen_height, screen_width, DARKGRAY, GRAY};
 
-use crate::{EDGE_DISTANCE, AXIS_THICKNESS, SPACINGY, SPACINGX};
+use crate::{AXIS_THICKNESS, EDGE_DISTANCE, SPACINGX, SPACINGY};
 
 pub fn draw_axis() {
     // x axis
@@ -32,8 +32,8 @@ pub fn draw_grid() {
             y_coord,
             screen_width(),
             y_coord,
-            AXIS_THICKNESS-1.8,
-            GREEN,
+            AXIS_THICKNESS - 1.8,
+            GRAY,
         );
     }
 
@@ -45,8 +45,8 @@ pub fn draw_grid() {
             0.,
             x_coord,
             screen_height(),
-            AXIS_THICKNESS-1.8,
-            GREEN,
+            AXIS_THICKNESS - 1.8,
+            GRAY,
         );
     }
 }
