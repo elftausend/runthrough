@@ -2,8 +2,11 @@ pub mod fun_eval;
 mod grid;
 
 use fun_eval::lexer::find_tokens;
-//use grid::{draw_axis, draw_graph, draw_grid};
-//use macroquad::prelude::{clear_background, next_frame, WHITE};
+use grid::{draw_axis, draw_graph, draw_grid, input_field};
+use macroquad::{
+    hash,
+    prelude::{clear_background, next_frame, vec2, WHITE},
+};
 
 const EDGE_DISTANCE: f32 = 40.;
 const AXIS_THICKNESS: f32 = 3.;
@@ -16,34 +19,13 @@ fn x() {
     println!("c: {calc}");
 }
 
-#[test]
-fn test_graplot() {
-    let postfix = fun_eval::interpret::interpret_fn("x^2 + 3");
-
-    let mut xs = vec![0.; 200];
-
-    let mut add = -100f64;
-    for x in &mut xs {
-        *x = (add / 100.) * 1.;
-        add += 1.;
-    }
-
-    let mut ys = vec![0.; 200];
-    for (i, y) in ys.iter_mut().enumerate() {
-        *y = fun_eval::interpret::postfix_eval(&postfix, xs[i]).unwrap();
-    }
-
-    let plot = graplot::Plot::new(ys);
-    plot.show();
-}
-
-fn main() {}
-
-/* 
 #[macroquad::main("runthrough")]
 async fn main() {
     let input = "x + 3";
     find_tokens(input);
+
+    let mut data0 = String::new();
+    let mut data1 = String::new();
 
     loop {
         clear_background(WHITE);
@@ -53,7 +35,8 @@ async fn main() {
 
         draw_graph(input);
 
+        input_field(vec2(10., 10.), vec2(200., 30.), hash!());
+
         next_frame().await;
     }
 }
-*/

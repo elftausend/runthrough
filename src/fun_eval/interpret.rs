@@ -7,17 +7,16 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
     let mut queue = Vec::<TokenCapture>::new();
 
     for token in tokens {
-        if !token.kind().is_op() {
-            queue.push(token);
-        } else if token.kind().is_unary() {
+        if !token.kind().is_op() || token.kind().is_unary() {
             queue.push(token);
         } else if let Some(last) = stack.last() {
-            if (token.kind() == TokenKind::Add || token.kind() == TokenKind::Sub
-            || token.kind() == TokenKind::Mul || token.kind() == TokenKind::Div) && last.kind() == TokenKind::Pow {
-                queue.push(stack.pop().unwrap());
-                stack.push(token);
-            } else if (token.kind() == TokenKind::Add || token.kind() == TokenKind::Sub)
-                && (last.kind() == TokenKind::Mul || last.kind() == TokenKind::Div)
+            if ((token.kind() == TokenKind::Add
+                || token.kind() == TokenKind::Sub
+                || token.kind() == TokenKind::Mul
+                || token.kind() == TokenKind::Div)
+                && last.kind() == TokenKind::Pow)
+                || (token.kind() == TokenKind::Add || token.kind() == TokenKind::Sub)
+                    && (last.kind() == TokenKind::Mul || last.kind() == TokenKind::Div)
             {
                 queue.push(stack.pop().unwrap());
                 stack.push(token);
@@ -32,10 +31,8 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
                     //println!("pushed");
                     queue.push(stack.pop().unwrap());
                 }*/
-            } else {
-                if !token.kind().is_unary() {
-                    stack.push(token);
-                }
+            } else if !token.kind().is_unary() {
+                stack.push(token);
             }
         } else {
             stack.push(token);
@@ -69,38 +66,36 @@ pub fn postfix_eval(
     for token in postfix {
         if !token.kind().is_op() {
             stack.push(*token);
+        } else if token.kind().is_unary() {
+            let value = stack.pop().unwrap();
+            let value = arg_or_num(&value, x_populate);
+            let out = match token.kind() {
+                TokenKind::Sin => value.sin(),
+                TokenKind::Sqrt => value.sqrt(),
+                _ => 0.,
+            };
+            let x = Box::leak(out.to_string().into_boxed_str());
+            stack.push(TokenCapture::new(x, TokenKind::Number));
+            string_results.push(x as &str as *const str as *mut str);
         } else {
-            if token.kind().is_unary() {
-                let value = stack.pop().unwrap();
-                let value = arg_or_num(&value, x_populate);
-                let out = match token.kind() {
-                    TokenKind::Sin => value.sin(),
-                    TokenKind::Sqrt => value.sqrt(),
-                    _ => 0.,
-                };
-                let x = Box::leak(out.to_string().into_boxed_str());
-                stack.push(TokenCapture::new(x, TokenKind::Number));
-                string_results.push(x as &str as *const str as *mut str);
-            } else {
-                let right = stack.pop().unwrap();
-                let left = stack.pop().unwrap();
+            let right = stack.pop().unwrap();
+            let left = stack.pop().unwrap();
 
-                let rhs = arg_or_num(&right, x_populate);
-                let lhs = arg_or_num(&left, x_populate);
+            let rhs = arg_or_num(&right, x_populate);
+            let lhs = arg_or_num(&left, x_populate);
 
-                let out = match token.kind() {
-                    TokenKind::Add => lhs + rhs,
-                    TokenKind::Mul => lhs * rhs,
-                    TokenKind::Sub => lhs - rhs,
-                    TokenKind::Div => lhs / rhs,
-                    TokenKind::Pow => lhs.powf(rhs),
-                    TokenKind::E => lhs.powf(rhs),
-                    _ => 0.,
-                };
-                let x = Box::leak(out.to_string().into_boxed_str());
-                stack.push(TokenCapture::new(x, TokenKind::Number));
-                string_results.push(x as &str as *const str as *mut str);
-            }
+            let out = match token.kind() {
+                TokenKind::Add => lhs + rhs,
+                TokenKind::Mul => lhs * rhs,
+                TokenKind::Sub => lhs - rhs,
+                TokenKind::Div => lhs / rhs,
+                TokenKind::Pow => lhs.powf(rhs),
+                TokenKind::E => lhs.powf(rhs),
+                _ => 0.,
+            };
+            let x = Box::leak(out.to_string().into_boxed_str());
+            stack.push(TokenCapture::new(x, TokenKind::Number));
+            string_results.push(x as &str as *const str as *mut str);
         }
     }
 
@@ -116,8 +111,7 @@ pub fn postfix_eval(
 
 pub fn interpret_fn(input: &str) -> Vec<TokenCapture> {
     let tokens = lexer::find_tokens(input);
-    let postfix = postfix_notation(tokens);
-    postfix
+    postfix_notation(tokens)
 }
 
 #[cfg(test)]
@@ -135,7 +129,7 @@ mod tests {
 
     #[test]
     fn test_interpret_tokens() -> Result<(), <f64 as FromStr>::Err> {
-        let input = "(3+x^4)-1";
+        let input = "(3+x pow 4)-1";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
@@ -146,7 +140,7 @@ mod tests {
 
     #[test]
     fn test_interpret_tokens_e() -> Result<(), <f64 as FromStr>::Err> {
-        let input = "(3+e^x)-1";
+        let input = "(3+e pow x)-1";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
@@ -181,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_interpret_tokens_parans() -> Result<(), <f64 as FromStr>::Err> {
-        let input = "(((x + 1)^3) / 3) * 2";
+        let input = "(((x + 1)pow 3) / 3) * 2";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
@@ -192,7 +186,7 @@ mod tests {
 
     #[test]
     fn test_interpret_tokens_sqrt() -> Result<(), <f64 as FromStr>::Err> {
-        let input = "((((x + 1)^3) / 3) * 2).sqrt";
+        let input = "((((x + 1)pow 3) / 3) * 2).sqrt";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
@@ -204,15 +198,13 @@ mod tests {
 
     #[test]
     fn test_interpret_tokens_pow() -> Result<(), <f64 as FromStr>::Err> {
-        let input = "x^2 + 3";
+        let input = "xpow2 + 3";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
         let output = postfix_eval(&postfix, 2.);
 
-        println!("output: {}", output?);
+        assert_eq!(7., output?);
         Ok(())
     }
-
-
 }

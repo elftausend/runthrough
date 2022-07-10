@@ -48,7 +48,7 @@ lazy_static! {
         Token::new(TokenKind::RightParan, "[)]"),
         Token::new(TokenKind::Sin, ".sin"),
         Token::new(TokenKind::E, "e"),
-        Token::new(TokenKind::Pow, r"[\^]"),
+        Token::new(TokenKind::Pow, r"pow"),
         Token::new(TokenKind::Add, "[+]"),
         Token::new(TokenKind::Sub, "[-]"),
         Token::new(TokenKind::Mul, "[*]"),

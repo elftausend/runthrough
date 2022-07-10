@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#macroquad = "0.3.23"
+macroquad = "0.3.23"
 lazy_static = "1.4.0"
 regex = "1.5.5"
-graplot = "0.1.19"
+#graplot = "0.1.19"
