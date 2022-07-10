@@ -1,8 +1,10 @@
 pub mod fun_eval;
 mod grid;
+mod text_field;
 
 use fun_eval::lexer::find_tokens;
-use grid::{draw_axis, draw_graph, draw_grid, input_field, clear_pressed_keys};
+use grid::{draw_axis, draw_graph, draw_grid};
+use text_field::{clear_pressed_keys, input_field};
 use macroquad::{
     hash,
     prelude::{clear_background, next_frame, vec2, WHITE},
