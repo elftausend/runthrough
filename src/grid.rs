@@ -1,6 +1,10 @@
+/* 
 use macroquad::prelude::{draw_line, screen_height, screen_width, DARKGRAY, GRAY};
 
-use crate::{AXIS_THICKNESS, EDGE_DISTANCE, SPACINGX, SPACINGY};
+use crate::{
+    fun_eval::interpret::{interpret_fn, postfix_eval},
+    AXIS_THICKNESS, EDGE_DISTANCE, SPACINGX, SPACINGY,
+};
 
 pub fn draw_axis() {
     // x axis
@@ -50,3 +54,21 @@ pub fn draw_grid() {
         );
     }
 }
+
+pub fn draw_graph(fun: &str) {
+    let postfix = interpret_fn(fun);
+
+    let mut xs = vec![0.; 200];
+
+    let mut add = -100f64;
+    for x in &mut xs {
+        *x = (add / 100.) * 1.;
+        add += 1.;
+    }
+
+    let mut ys = vec![0.; 200];
+    for (i, y) in ys.iter_mut().enumerate() {
+        *y = postfix_eval(&postfix, xs[i]).unwrap();
+    }
+}
+*/

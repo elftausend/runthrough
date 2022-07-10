@@ -1,4 +1,6 @@
-use super::lexer::{TokenCapture, TokenKind};
+use std::str::FromStr;
+
+use super::lexer::{self, TokenCapture, TokenKind};
 
 pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
     let mut stack = Vec::<TokenCapture>::new();
@@ -10,9 +12,8 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
         } else if token.kind().is_unary() {
             queue.push(token);
         } else if let Some(last) = stack.last() {
-            if token.kind() == TokenKind::Pow
-                && (last.kind() == TokenKind::Mul || last.kind() == TokenKind::Div)
-            {
+            if (token.kind() == TokenKind::Add || token.kind() == TokenKind::Sub
+            || token.kind() == TokenKind::Mul || token.kind() == TokenKind::Div) && last.kind() == TokenKind::Pow {
                 queue.push(stack.pop().unwrap());
                 stack.push(token);
             } else if (token.kind() == TokenKind::Add || token.kind() == TokenKind::Sub)
@@ -31,12 +32,10 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
                     //println!("pushed");
                     queue.push(stack.pop().unwrap());
                 }*/
-                
             } else {
                 if !token.kind().is_unary() {
                     stack.push(token);
                 }
-                
             }
         } else {
             stack.push(token);
@@ -50,23 +49,26 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
     queue
 }
 
-fn arg_or_num(token: &TokenCapture, x_populate: f32) -> f32 {
+fn arg_or_num(token: &TokenCapture, x_populate: f64) -> f64 {
     if token.kind() == TokenKind::Argument {
         x_populate
     } else if token.kind() == TokenKind::E {
-        std::f32::consts::E
+        std::f64::consts::E
     } else {
-        token.value().parse::<f32>().unwrap()
+        token.value().parse::<f64>().unwrap()
     }
 }
 
-pub fn postfix_eval(postfix: Vec<TokenCapture>, x_populate: f32) -> String {
+pub fn postfix_eval(
+    postfix: &Vec<TokenCapture>,
+    x_populate: f64,
+) -> Result<f64, <f64 as FromStr>::Err> {
     let mut string_results = Vec::<*mut str>::new();
     let mut stack = Vec::<TokenCapture>::new();
 
     for token in postfix {
         if !token.kind().is_op() {
-            stack.push(token);
+            stack.push(*token);
         } else {
             if token.kind().is_unary() {
                 let value = stack.pop().unwrap();
@@ -109,17 +111,22 @@ pub fn postfix_eval(postfix: Vec<TokenCapture>, x_populate: f32) -> String {
             Box::from_raw(string);
         }
     }
+    output.parse::<f64>()
+}
 
-    output
+pub fn interpret_fn(input: &str) -> Vec<TokenCapture> {
+    let tokens = lexer::find_tokens(input);
+    let postfix = postfix_notation(tokens);
+    postfix
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::fun_eval::lexer;
-
     use super::{postfix_eval, postfix_notation};
+    use crate::fun_eval::lexer;
+    use std::str::FromStr;
 
-    fn roughly_equals(a: f32, b: f32) {
+    fn roughly_equals(a: f64, b: f64) {
         let diff = (a - b).abs();
         if diff >= 0.01 {
             panic!("a {a} != b {b}");
@@ -127,65 +134,85 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens() {
+    fn test_interpret_tokens() -> Result<(), <f64 as FromStr>::Err> {
         let input = "(3+x^4)-1";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
-        let output = postfix_eval(postfix, 5.);
-        assert_eq!(Ok((3. + 5f32.powf(4.)) - 1.), output.parse::<f32>());
+        let output = postfix_eval(&postfix, 5.);
+        assert_eq!((3. + 5f64.powf(4.)) - 1., output?);
+        Ok(())
     }
 
     #[test]
-    fn test_interpret_tokens_e() {
+    fn test_interpret_tokens_e() -> Result<(), <f64 as FromStr>::Err> {
         let input = "(3+e^x)-1";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
-        let output = postfix_eval(postfix, 5.).parse::<f32>().unwrap();
+        let output = postfix_eval(&postfix, 5.)?;
         roughly_equals(output, 150.413159);
+        Ok(())
     }
 
     #[test]
-    fn test_interpret_tokens_sin() {
+    fn test_interpret_tokens_sin() -> Result<(), <f64 as FromStr>::Err> {
         let input = "x.sin";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
-        let output = postfix_eval(postfix, std::f32::consts::PI / 2.);
+        let output = postfix_eval(&postfix, std::f64::consts::PI / 2.);
 
-        assert_eq!(output.parse::<f32>().unwrap(), 1.);
+        assert_eq!(output?, 1.);
+        Ok(())
     }
 
     #[test]
-    fn test_interpret_tokens_sin1() {
+    fn test_interpret_tokens_sin1() -> Result<(), <f64 as FromStr>::Err> {
         let input = "(5*x).sin + (2 * 3).sin";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
-        let output = postfix_eval(postfix, std::f32::consts::PI / 2.);
+        let output = postfix_eval(&postfix, std::f64::consts::PI / 2.);
 
-        roughly_equals(output.parse::<f32>().unwrap(), 0.7205845);
+        roughly_equals(output?, 0.7205845);
+        Ok(())
     }
 
     #[test]
-    fn test_interpret_tokens_parans() {
+    fn test_interpret_tokens_parans() -> Result<(), <f64 as FromStr>::Err> {
         let input = "(((x + 1)^3) / 3) * 2";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
-        let output = postfix_eval(postfix, 2.);
-        assert_eq!(output.parse::<f32>().unwrap(), 18.);
+        let output = postfix_eval(&postfix, 2.);
+        assert_eq!(output?, 18.);
+        Ok(())
     }
 
     #[test]
-    fn test_interpret_tokens_sqrt() {
+    fn test_interpret_tokens_sqrt() -> Result<(), <f64 as FromStr>::Err> {
         let input = "((((x + 1)^3) / 3) * 2).sqrt";
 
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
-        let output = postfix_eval(postfix, 2.);
+        let output = postfix_eval(&postfix, 2.);
 
-        roughly_equals(output.parse::<f32>().unwrap(), 4.2426)
+        roughly_equals(output?, 4.2426);
+        Ok(())
     }
+
+    #[test]
+    fn test_interpret_tokens_pow() -> Result<(), <f64 as FromStr>::Err> {
+        let input = "x^2 + 3";
+
+        let tokens = lexer::find_tokens(input);
+        let postfix = postfix_notation(tokens);
+        let output = postfix_eval(&postfix, 2.);
+
+        println!("output: {}", output?);
+        Ok(())
+    }
+
+
 }
