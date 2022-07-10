@@ -19,7 +19,10 @@ pub enum TokenKind {
 
 impl TokenKind {
     pub fn is_op(self) -> bool {
-        !matches!(self, Self::Number | Self::Argument)
+        !matches!(self, Self::Number | Self::Argument | Self::E)
+    }
+    pub fn is_unary(self) -> bool {
+        matches!(self, Self::Sin | Self::Sqrt)
     }
 }
 
@@ -43,7 +46,7 @@ lazy_static! {
     pub static ref TOKENS: Vec<Token> = vec![
         Token::new(TokenKind::LeftParan, "[(]"),
         Token::new(TokenKind::RightParan, "[)]"),
-        Token::new(TokenKind::Sin, "sin"),
+        Token::new(TokenKind::Sin, ".sin"),
         Token::new(TokenKind::E, "e"),
         Token::new(TokenKind::Pow, r"[\^]"),
         Token::new(TokenKind::Add, "[+]"),
@@ -56,7 +59,7 @@ lazy_static! {
     ];
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TokenCapture<'a> {
     start: usize,
     end: usize,
@@ -195,6 +198,23 @@ mod tests {
     fn test_find_tokens_pow() {
         let input = "x ^ 3";
         let tokens = find_tokens(input);
+        println!("tokens: {tokens:?}");
+    }
+
+    #[test]
+    fn test_find_tokens_exp() {
+        let input = "e ^ x";
+        let tokens = find_tokens(input);
+        println!("tokens: {tokens:?}");
+    }
+
+    #[test]
+    fn test_find_tokens_sin() {
+        let input = "(5*x).sin + 1";
+        let tokens = find_tokens(input);
+        for token in &tokens {
+            println!("{}", token.kind.is_unary());
+        }
         println!("tokens: {tokens:?}");
     }
 }
