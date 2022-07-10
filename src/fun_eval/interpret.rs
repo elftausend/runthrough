@@ -73,6 +73,7 @@ pub fn postfix_eval(postfix: Vec<TokenCapture>, x_populate: f32) -> String {
                 let value = arg_or_num(&value, x_populate);
                 let out = match token.kind() {
                     TokenKind::Sin => value.sin(),
+                    TokenKind::Sqrt => value.sqrt(),
                     _ => 0.,
                 };
                 let x = Box::leak(out.to_string().into_boxed_str());
@@ -155,7 +156,7 @@ mod tests {
 
         assert_eq!(output.parse::<f32>().unwrap(), 1.);
     }
-    
+
     #[test]
     fn test_interpret_tokens_sin1() {
         let input = "(5*x).sin + (2 * 3).sin";
@@ -174,6 +175,17 @@ mod tests {
         let tokens = lexer::find_tokens(input);
         let postfix = postfix_notation(tokens);
         let output = postfix_eval(postfix, 2.);
-        println!("Output: {output}");
+        assert_eq!(output.parse::<f32>().unwrap(), 18.);
+    }
+
+    #[test]
+    fn test_interpret_tokens_sqrt() {
+        let input = "((((x + 1)^3) / 3) * 2).sqrt";
+
+        let tokens = lexer::find_tokens(input);
+        let postfix = postfix_notation(tokens);
+        let output = postfix_eval(postfix, 2.);
+
+        roughly_equals(output.parse::<f32>().unwrap(), 4.2426)
     }
 }
