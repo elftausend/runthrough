@@ -1,7 +1,7 @@
 
 
 use macroquad::prelude::{
-        draw_line, screen_height, screen_width, DARKGRAY, GRAY,
+        draw_line, screen_height, screen_width, DARKGRAY, GRAY, draw_circle, GREEN,
     };
 
 use crate::{
@@ -59,18 +59,50 @@ pub fn draw_grid() {
 }
 
 pub fn draw_graph(fun: &str) {
+
+    let fun = if fun.is_empty() {
+        "x + 1"
+    } else {
+        fun
+    };
+
     let postfix = interpret_fn(fun);
 
-    let mut xs = vec![0.; 200];
+    let mut xs = vec![0.; 20000];
 
-    let mut add = -100f64;
+    let mut add = -10000f64;
     for x in &mut xs {
-        *x = (add / 100.) * 1.;
+        *x = (add / 10000.) * 30.;
         add += 1.;
     }
 
-    let mut ys = vec![0.; 200];
+    let mut ys = vec![0.; 20000];
     for (i, y) in ys.iter_mut().enumerate() {
         *y = postfix_eval(&postfix, xs[i]).unwrap();
     }
+
+    //let xs = [1., 2., 3., 4., 5.,];
+    //let ys = [1., 2., 3., 4., 5.,];
+
+    let mut coords = Vec::new();
+
+    for i in 0..xs.len() {
+        let x = SPACINGX * xs[i] as f32 + EDGE_DISTANCE;
+        let y = -SPACINGY * ys[i] as f32 + screen_height() - EDGE_DISTANCE;
+        
+        coords.push((x, y));
+
+        if coords.len() >= 2 {
+            draw_line(
+                coords[0].0,
+                coords[0].1,
+                coords[1].0,
+                coords[1].1,
+                3.,
+                GREEN);
+            coords.remove(0);
+        } 
+        
+    }
+    
 }

@@ -36,10 +36,10 @@ async fn main() {
         draw_grid();
         draw_axis();
 
-        draw_graph(input);
 
-        input_field(vec2(10., 10.), vec2(200., 30.), hash!());
-        input_field(vec2(10., 100.), vec2(200., 30.), hash!());
+        let input = input_field(vec2(10., 10.), vec2(200., 30.), hash!());
+        draw_graph(input);
+        //input_field(vec2(10., 100.), vec2(200., 30.), hash!());
 
         next_frame().await;
     }

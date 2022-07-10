@@ -49,14 +49,14 @@ pub fn clear_pressed_keys() {
                 return false;
             }
         }
-        return true;
+        true
     });
     if no_field_active {
         input::get_char_pressed();
     }
 }
 
-pub fn input_field(pos: Vec2, size: Vec2, id: u64) {
+pub fn input_field(pos: Vec2, size: Vec2, id: u64) -> &'static str {
     let field = InputFieldCache::get(id);
     draw_rectangle(pos.x, pos.y, size.x, size.y, LIGHTGRAY);
     draw_rectangle(pos.x + 1.5, pos.y + 1.5, size.x - 2.5, size.y - 3., WHITE);
@@ -73,15 +73,21 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64) {
     draw_text(&field.text, pos.x + 1.5, pos.y + size.y / 1.5, 21., GREEN);
 
     if !field.active {
-        return;
+        return &field.text;
     }
     
     if let Some(pressed) = input::get_char_pressed() {
+        if pressed as u8 == 13 {
+            field.active = false;
+            return &field.text;
+        }
         if pressed as u8 == 127 {
             field.text.pop();
         } else if field.text.len() <= (size.x / (21. * 0.5)).ceil() as usize {
             field.text.push(pressed);
         }
     }
+
+    ""
 
 }
