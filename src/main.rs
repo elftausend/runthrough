@@ -1,8 +1,8 @@
-    mod grid;
-mod lexer;
+pub mod fun_eval;
+mod grid;
 
+use fun_eval::lexer::find_tokens;
 use grid::{draw_axis, draw_grid};
-use lexer::find_tokens;
 use macroquad::prelude::{clear_background, next_frame, WHITE};
 
 const EDGE_DISTANCE: f32 = 40.;
