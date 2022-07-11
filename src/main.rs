@@ -1,19 +1,11 @@
-pub mod fun_eval;
-mod grid;
-mod text_field;
 
-use fun_eval::lexer::find_tokens;
-use grid::{draw_axis, draw_graph, draw_grid};
-use text_field::{clear_pressed_keys, input_field};
 use macroquad::{
     hash,
     prelude::{clear_background, next_frame, vec2, WHITE, GREEN, BLUE, screen_width},
 };
+use runthrough::{fun_eval::lexer::find_tokens, draw_grid, draw_axis, clear_pressed_keys, input_field, draw_graph};
 
-const EDGE_DISTANCE: f32 = 40.;
-const AXIS_THICKNESS: f32 = 3.;
-const SPACINGX: f32 = 40.;
-const SPACINGY: f32 = 40.;
+
 
 #[test]
 fn x() {
@@ -26,9 +18,8 @@ async fn main() {
     let input = "x + 3";
     find_tokens(input);
 
-    let mut data0 = String::new();
-    let mut data1 = String::new();
-
+    let mut last_input = "";
+    
     loop {
         clear_pressed_keys();
         clear_background(WHITE);
@@ -38,7 +29,12 @@ async fn main() {
 
 
         let input = input_field(vec2(10., 10.), vec2(200., 30.), hash!(), GREEN);
+        if input != last_input {
+        }
+
         draw_graph(input, GREEN);
+
+        last_input = input;
         let input = input_field(vec2(screen_width() - 210., 10.), vec2(200., 30.), hash!(), BLUE);
         draw_graph(input, BLUE);
         next_frame().await;

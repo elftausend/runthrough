@@ -69,17 +69,20 @@ pub fn draw_graph(fun: &str, color: Color) {
         Err(_) => return,
     };
 
-    let mut xs = vec![0.; 20000];
+    let mut xs = vec![0.; 2000];
 
-    let mut add = -10000f64;
+    let mut add = -1000f64;
     for x in &mut xs {
-        *x = (add / 10000.) * 30.;
+        *x = (add / 1000.) * 30.;
         add += 1.;
     }
 
-    let mut ys = vec![0.; 20000];
+    let mut ys = vec![0.; 2000];
     for (i, y) in ys.iter_mut().enumerate() {
-        *y = postfix_eval(&postfix, xs[i]).unwrap();
+        *y = match postfix_eval(&postfix, xs[i]) {
+            Ok(y) => y,
+            Err(_) => return,
+        };
     }
 
     //let xs = [1., 2., 3., 4., 5.,];

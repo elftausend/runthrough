@@ -6,6 +6,7 @@ pub enum TokenKind {
     LeftParan,
     RightParan,
     Sin,
+    Cos,
     E,
     Pow,
     Add,
@@ -22,7 +23,7 @@ impl TokenKind {
         !matches!(self, Self::Number | Self::Argument | Self::E)
     }
     pub fn is_unary(self) -> bool {
-        matches!(self, Self::Sin | Self::Sqrt)
+        matches!(self, Self::Sin | Self::Sqrt | Self::Cos)
     }
 }
 
@@ -47,6 +48,7 @@ lazy_static! {
         Token::new(TokenKind::LeftParan, "[(]"),
         Token::new(TokenKind::RightParan, "[)]"),
         Token::new(TokenKind::Sin, ".sin"),
+        Token::new(TokenKind::Cos, ".cos"),
         Token::new(TokenKind::E, "e"),
         Token::new(TokenKind::Pow, r"pow"),
         Token::new(TokenKind::Add, "[+]"),

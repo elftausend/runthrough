@@ -84,6 +84,7 @@ pub fn postfix_eval(
             let value = arg_or_num(&value, x_populate);
             let out = match token.kind() {
                 TokenKind::Sin => value.sin(),
+                TokenKind::Cos => value.cos(),
                 TokenKind::Sqrt => value.sqrt(),
                 _ => 0.,
             };
@@ -115,10 +116,11 @@ pub fn postfix_eval(
     }
 
     // the argument is not populated with a value if only "x" was inputted
-    if stack[0].kind() == TokenKind::Argument {
+    let first = stack.first().ok_or(SyntaxError::Default)?;
+    if first.kind() == TokenKind::Argument {
         return Ok(x_populate);
     }
-    let output = stack[0].value().to_string();
+    let output = first.value().to_string();
 
     for string in string_results {
         unsafe {

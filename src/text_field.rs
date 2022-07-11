@@ -89,5 +89,4 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64, text_color: Color) -> &'stati
     }
 
     &field.text
-
 }
