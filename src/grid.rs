@@ -1,7 +1,7 @@
 
 
 use macroquad::prelude::{
-        draw_line, screen_height, screen_width, DARKGRAY, GRAY, draw_circle, GREEN,
+        draw_line, screen_height, screen_width, DARKGRAY, GRAY, Color,
     };
 
 use crate::{
@@ -58,13 +58,11 @@ pub fn draw_grid() {
     }
 }
 
-pub fn draw_graph(fun: &str) {
+pub fn draw_graph(fun: &str, color: Color) {
 
-    let fun = if fun.is_empty() {
-        "x + 1"
-    } else {
-        fun
-    };
+    if fun.is_empty() {
+        return;
+    }
 
     let postfix = interpret_fn(fun);
 
@@ -99,7 +97,7 @@ pub fn draw_graph(fun: &str) {
                 coords[1].0,
                 coords[1].1,
                 3.,
-                GREEN);
+                color);
             coords.remove(0);
         } 
         

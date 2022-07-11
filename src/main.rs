@@ -7,7 +7,7 @@ use grid::{draw_axis, draw_graph, draw_grid};
 use text_field::{clear_pressed_keys, input_field};
 use macroquad::{
     hash,
-    prelude::{clear_background, next_frame, vec2, WHITE},
+    prelude::{clear_background, next_frame, vec2, WHITE, GREEN, BLUE, screen_width},
 };
 
 const EDGE_DISTANCE: f32 = 40.;
@@ -37,10 +37,10 @@ async fn main() {
         draw_axis();
 
 
-        let input = input_field(vec2(10., 10.), vec2(200., 30.), hash!());
-        draw_graph(input);
-        //input_field(vec2(10., 100.), vec2(200., 30.), hash!());
-
+        let input = input_field(vec2(10., 10.), vec2(200., 30.), hash!(), GREEN);
+        draw_graph(input, GREEN);
+        let input = input_field(vec2(screen_width() - 210., 10.), vec2(200., 30.), hash!(), BLUE);
+        draw_graph(input, BLUE);
         next_frame().await;
     }
 }

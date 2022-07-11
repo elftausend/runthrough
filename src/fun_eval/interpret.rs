@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use super::lexer::{self, TokenCapture, TokenKind};
 
 pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
@@ -56,10 +54,12 @@ fn arg_or_num(token: &TokenCapture, x_populate: f64) -> f64 {
     }
 }
 
+
+// TODO: rewrite
 pub fn postfix_eval(
     postfix: &Vec<TokenCapture>,
     x_populate: f64,
-) -> Result<f64, <f64 as FromStr>::Err> {
+) -> Result<f64, Box<dyn std::error::Error>> {
     let mut string_results = Vec::<*mut str>::new();
     let mut stack = Vec::<TokenCapture>::new();
 
@@ -79,6 +79,8 @@ pub fn postfix_eval(
             string_results.push(x as &str as *const str as *mut str);
         } else {
             let right = stack.pop().unwrap();
+
+            // unwrapping means that a binary operator has a lhs and (in this case) a rhs.
             let left = stack.pop().unwrap();
 
             let rhs = arg_or_num(&right, x_populate);
@@ -99,6 +101,10 @@ pub fn postfix_eval(
         }
     }
 
+    // the argument is not populated with a value if only "x" was inputted
+    if stack[0].kind() == TokenKind::Argument {
+        return Ok(x_populate);
+    }
     let output = stack[0].value().to_string();
 
     for string in string_results {
@@ -106,7 +112,7 @@ pub fn postfix_eval(
             Box::from_raw(string);
         }
     }
-    output.parse::<f64>()
+    Ok(output.parse::<f64>()?)
 }
 
 pub fn interpret_fn(input: &str) -> Vec<TokenCapture> {
@@ -118,7 +124,6 @@ pub fn interpret_fn(input: &str) -> Vec<TokenCapture> {
 mod tests {
     use super::{postfix_eval, postfix_notation};
     use crate::fun_eval::lexer;
-    use std::str::FromStr;
 
     fn roughly_equals(a: f64, b: f64) {
         let diff = (a - b).abs();
@@ -128,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens() -> Result<(), Box<dyn std::error::Error>> {
         let input = "(3+x pow 4)-1";
 
         let tokens = lexer::find_tokens(input);
@@ -139,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens_e() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens_e() -> Result<(), Box<dyn std::error::Error>> {
         let input = "(3+e pow x)-1";
 
         let tokens = lexer::find_tokens(input);
@@ -150,7 +155,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens_sin() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens_sin() -> Result<(), Box<dyn std::error::Error>> {
         let input = "x.sin";
 
         let tokens = lexer::find_tokens(input);
@@ -162,7 +167,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens_sin1() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens_sin1() -> Result<(), Box<dyn std::error::Error>> {
         let input = "(5*x).sin + (2 * 3).sin";
 
         let tokens = lexer::find_tokens(input);
@@ -174,7 +179,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens_parans() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens_parans() -> Result<(), Box<dyn std::error::Error>> {
         let input = "(((x + 1)pow 3) / 3) * 2";
 
         let tokens = lexer::find_tokens(input);
@@ -185,7 +190,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens_sqrt() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens_sqrt() -> Result<(), Box<dyn std::error::Error>> {
         let input = "((((x + 1)pow 3) / 3) * 2).sqrt";
 
         let tokens = lexer::find_tokens(input);
@@ -197,7 +202,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interpret_tokens_pow() -> Result<(), <f64 as FromStr>::Err> {
+    fn test_interpret_tokens_pow() -> Result<(), Box<dyn std::error::Error>> {
         let input = "xpow2 + 3";
 
         let tokens = lexer::find_tokens(input);

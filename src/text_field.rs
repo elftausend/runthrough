@@ -1,6 +1,6 @@
 use std::{collections::HashMap, cell::RefCell};
 
-use macroquad::{prelude::{draw_rectangle, Vec2, LIGHTGRAY, WHITE, MouseButton, GREEN, draw_text}, input};
+use macroquad::{prelude::{draw_rectangle, Vec2, LIGHTGRAY, WHITE, MouseButton, GREEN, draw_text, Color}, input};
 
 #[derive(Debug, Clone)]
 pub struct InputField {
@@ -56,7 +56,7 @@ pub fn clear_pressed_keys() {
     }
 }
 
-pub fn input_field(pos: Vec2, size: Vec2, id: u64) -> &'static str {
+pub fn input_field(pos: Vec2, size: Vec2, id: u64, text_color: Color) -> &'static str {
     let field = InputFieldCache::get(id);
     draw_rectangle(pos.x, pos.y, size.x, size.y, LIGHTGRAY);
     draw_rectangle(pos.x + 1.5, pos.y + 1.5, size.x - 2.5, size.y - 3., WHITE);
@@ -70,7 +70,7 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64) -> &'static str {
         field.active = false;
     }
 
-    draw_text(&field.text, pos.x + 1.5, pos.y + size.y / 1.5, 21., GREEN);
+    draw_text(&field.text, pos.x + 1.5, pos.y + size.y / 1.5, 21., text_color);
 
     if !field.active {
         return &field.text;
