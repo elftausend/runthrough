@@ -64,7 +64,10 @@ pub fn draw_graph(fun: &str, color: Color) {
         return;
     }
 
-    let postfix = interpret_fn(fun);
+    let postfix = match interpret_fn(fun) {
+        Ok(postfix) => postfix,
+        Err(_) => return,
+    };
 
     let mut xs = vec![0.; 20000];
 

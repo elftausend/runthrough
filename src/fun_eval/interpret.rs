@@ -1,6 +1,21 @@
+use std::fmt::Display;
+
 use super::lexer::{self, TokenCapture, TokenKind};
 
-pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
+#[derive(Debug)]
+pub enum SyntaxError {
+    Default
+}
+
+impl Display for SyntaxError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Syntax Error")
+    }
+}
+
+impl std::error::Error for SyntaxError {}
+
+pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Result<Vec<TokenCapture>, Box<dyn std::error::Error>> {
     let mut stack = Vec::<TokenCapture>::new();
     let mut queue = Vec::<TokenCapture>::new();
 
@@ -22,7 +37,7 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
                 let mut popped = stack.pop().unwrap();
                 while popped.kind() != TokenKind::LeftParan {
                     queue.push(popped);
-                    popped = stack.pop().unwrap();
+                    popped = stack.pop().ok_or(SyntaxError::Default)?;
                 }
 
                 /*if stack[stack.len()-1].kind().is_unary() {
@@ -40,8 +55,7 @@ pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Vec<TokenCapture> {
     for element in stack.into_iter().rev() {
         queue.push(element);
     }
-
-    queue
+    Ok(queue)
 }
 
 fn arg_or_num(token: &TokenCapture, x_populate: f64) -> f64 {
@@ -53,7 +67,6 @@ fn arg_or_num(token: &TokenCapture, x_populate: f64) -> f64 {
         token.value().parse::<f64>().unwrap()
     }
 }
-
 
 // TODO: rewrite
 pub fn postfix_eval(
@@ -67,7 +80,7 @@ pub fn postfix_eval(
         if !token.kind().is_op() {
             stack.push(*token);
         } else if token.kind().is_unary() {
-            let value = stack.pop().unwrap();
+            let value = stack.pop().ok_or(SyntaxError::Default)?;
             let value = arg_or_num(&value, x_populate);
             let out = match token.kind() {
                 TokenKind::Sin => value.sin(),
@@ -78,10 +91,10 @@ pub fn postfix_eval(
             stack.push(TokenCapture::new(x, TokenKind::Number));
             string_results.push(x as &str as *const str as *mut str);
         } else {
-            let right = stack.pop().unwrap();
+            let right = stack.pop().ok_or(SyntaxError::Default)?;
 
-            // unwrapping means that a binary operator has a lhs and (in this case) a rhs.
-            let left = stack.pop().unwrap();
+            // unwrapping means that a binary operator has a lhs and a rhs.
+            let left = stack.pop().ok_or(SyntaxError::Default)?;
 
             let rhs = arg_or_num(&right, x_populate);
             let lhs = arg_or_num(&left, x_populate);
@@ -115,7 +128,7 @@ pub fn postfix_eval(
     Ok(output.parse::<f64>()?)
 }
 
-pub fn interpret_fn(input: &str) -> Vec<TokenCapture> {
+pub fn interpret_fn(input: &str) -> Result<Vec<TokenCapture>, Box<dyn std::error::Error>> {
     let tokens = lexer::find_tokens(input);
     postfix_notation(tokens)
 }
@@ -137,7 +150,7 @@ mod tests {
         let input = "(3+x pow 4)-1";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, 5.);
         assert_eq!((3. + 5f64.powf(4.)) - 1., output?);
         Ok(())
@@ -148,7 +161,7 @@ mod tests {
         let input = "(3+e pow x)-1";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, 5.)?;
         roughly_equals(output, 150.413159);
         Ok(())
@@ -159,7 +172,7 @@ mod tests {
         let input = "x.sin";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, std::f64::consts::PI / 2.);
 
         assert_eq!(output?, 1.);
@@ -171,7 +184,7 @@ mod tests {
         let input = "(5*x).sin + (2 * 3).sin";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, std::f64::consts::PI / 2.);
 
         roughly_equals(output?, 0.7205845);
@@ -183,7 +196,7 @@ mod tests {
         let input = "(((x + 1)pow 3) / 3) * 2";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, 2.);
         assert_eq!(output?, 18.);
         Ok(())
@@ -194,7 +207,7 @@ mod tests {
         let input = "((((x + 1)pow 3) / 3) * 2).sqrt";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, 2.);
 
         roughly_equals(output?, 4.2426);
@@ -206,7 +219,7 @@ mod tests {
         let input = "xpow2 + 3";
 
         let tokens = lexer::find_tokens(input);
-        let postfix = postfix_notation(tokens);
+        let postfix = postfix_notation(tokens)?;
         let output = postfix_eval(&postfix, 2.);
 
         assert_eq!(7., output?);

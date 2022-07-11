@@ -1,6 +1,6 @@
 use std::{collections::HashMap, cell::RefCell};
 
-use macroquad::{prelude::{draw_rectangle, Vec2, LIGHTGRAY, WHITE, MouseButton, GREEN, draw_text, Color}, input};
+use macroquad::{prelude::{draw_rectangle, Vec2, LIGHTGRAY, WHITE, MouseButton, draw_text, Color}, input};
 
 #[derive(Debug, Clone)]
 pub struct InputField {
@@ -88,6 +88,6 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64, text_color: Color) -> &'stati
         }
     }
 
-    ""
+    &field.text
 
 }
