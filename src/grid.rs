@@ -1,8 +1,4 @@
-
-
-use macroquad::prelude::{
-        draw_line, screen_height, screen_width, DARKGRAY, GRAY, Color,
-    };
+use macroquad::prelude::{draw_line, screen_height, screen_width, Color, DARKGRAY, GRAY};
 
 use crate::{
     fun_eval::interpret::{interpret_fn, postfix_eval},
@@ -59,7 +55,6 @@ pub fn draw_grid() {
 }
 
 pub fn draw_graph(fun: &str, color: Color) {
-
     if fun.is_empty() {
         return;
     }
@@ -93,7 +88,7 @@ pub fn draw_graph(fun: &str, color: Color) {
     for i in 0..xs.len() {
         let x = SPACINGX * xs[i] as f32 + EDGE_DISTANCE;
         let y = -SPACINGY * ys[i] as f32 + screen_height() - EDGE_DISTANCE;
-        
+
         coords.push((x, y));
 
         if coords.len() >= 2 {
@@ -103,10 +98,9 @@ pub fn draw_graph(fun: &str, color: Color) {
                 coords[1].0,
                 coords[1].1,
                 3.,
-                color);
+                color,
+            );
             coords.remove(0);
-        } 
-        
+        }
     }
-    
 }

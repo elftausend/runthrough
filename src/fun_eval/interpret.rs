@@ -4,7 +4,7 @@ use super::lexer::{self, TokenCapture, TokenKind};
 
 #[derive(Debug)]
 pub enum SyntaxError {
-    Default
+    Default,
 }
 
 impl Display for SyntaxError {
@@ -15,7 +15,9 @@ impl Display for SyntaxError {
 
 impl std::error::Error for SyntaxError {}
 
-pub fn postfix_notation(tokens: Vec<TokenCapture>) -> Result<Vec<TokenCapture>, Box<dyn std::error::Error>> {
+pub fn postfix_notation(
+    tokens: Vec<TokenCapture>,
+) -> Result<Vec<TokenCapture>, Box<dyn std::error::Error>> {
     let mut stack = Vec::<TokenCapture>::new();
     let mut queue = Vec::<TokenCapture>::new();
 

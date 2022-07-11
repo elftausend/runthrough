@@ -57,6 +57,7 @@ lazy_static! {
         Token::new(TokenKind::Div, "[/]"),
         Token::new(TokenKind::Sqrt, ".sqrt"),
         Token::new(TokenKind::Number, r"\d+"),
+        //Token::new(TokenKind::Float, "\d+\.\d+"),
         Token::new(TokenKind::Argument, "x"),
     ];
 }
