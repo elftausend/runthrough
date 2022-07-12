@@ -1,4 +1,4 @@
-use macroquad::prelude::{draw_line, screen_height, screen_width, Color, DARKGRAY, GRAY};
+use macroquad::prelude::{draw_line, screen_height, screen_width, Color, DARKGRAY, GRAY, draw_text, BLACK};
 
 use crate::{
     fun_eval::interpret::{interpret_fn, postfix_eval},
@@ -51,6 +51,17 @@ pub fn draw_grid() {
             AXIS_THICKNESS - 1.8,
             GRAY,
         );
+    }
+
+    let axis_num_font_size = 20.;
+
+    // x axis numbers
+    for num in 1..horizontal_grid_lines as usize {
+        let x = EDGE_DISTANCE + SPACINGX * num as f32;
+        let y = screen_height() - EDGE_DISTANCE;
+        draw_line(x, y - 4., x, y + 4., AXIS_THICKNESS, DARKGRAY);
+        let text = format!("{num}");
+        draw_text(&text, x, y, axis_num_font_size, BLACK);
     }
 }
 

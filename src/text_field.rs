@@ -3,8 +3,7 @@ use std::{cell::RefCell, collections::HashMap};
 use macroquad::{
     input,
     prelude::{
-        draw_line, draw_rectangle, draw_text, Color, MouseButton, Vec2, LIGHTGRAY, MAGENTA,
-        WHITE,
+        draw_line, draw_rectangle, draw_text, Color, MouseButton, Vec2, LIGHTGRAY, MAGENTA, WHITE,
     },
 };
 
@@ -87,17 +86,7 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64, text_color: Color) -> &'stati
         text_color,
     );
 
-    if field.active {
-        let move_cursor = field.insert_idx as f32 * 9.19;
-        draw_line(
-            pos.x + 2.5 + move_cursor,
-            pos.y + 8.5,
-            pos.x + 2.5 + move_cursor,
-            pos.y + size.y - 8.5,
-            2.5,
-            Color::new(1., 0.3, 0.4, 0.7),
-        );
-    } else {
+    if !field.active {
         return &field.text;
     }
 
@@ -127,12 +116,22 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64, text_color: Color) -> &'stati
         } else if field.text.len() <= (size.x / (21. * 0.5)).ceil() as usize
             && (('a'..='z').contains(&pressed)
                 || ('0'..='9').contains(&pressed)
-                || ".+*/- ".contains(pressed))
+                || ".+*/-() ".contains(pressed))
         {
             field.text.insert(field.insert_idx, pressed);
             field.insert_idx += 1;
         }
     }
+
+    let move_cursor = field.insert_idx as f32 * 9.19;
+    draw_line(
+        pos.x + 2.5 + move_cursor,
+        pos.y + 8.5,
+        pos.x + 2.5 + move_cursor,
+        pos.y + size.y - 8.5,
+        2.5,
+        Color::new(1., 0.3, 0.4, 0.7),
+    );
 
     &field.text
 }

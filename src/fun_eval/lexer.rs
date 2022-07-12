@@ -82,8 +82,17 @@ impl<'a> TokenCapture<'a> {
     pub fn kind(&self) -> TokenKind {
         self.kind
     }
+
+    pub fn kind_mut(&mut self) -> &mut TokenKind {
+        &mut self.kind
+    }
+
     pub fn value(&self) -> &str {
         self.value
+    }
+
+    pub fn set_value(&mut self, value: &'a str) {
+        self.value = value;
     }
 }
 
