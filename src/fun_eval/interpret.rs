@@ -15,9 +15,33 @@ impl Display for SyntaxError {
 
 impl std::error::Error for SyntaxError {}
 
+pub fn set_minus(tokens: &mut Vec<TokenCapture>) -> Vec<*mut str> {
+    let mut string_handles = vec![];
+    for token in tokens {
+        if token.kind() != TokenKind::Sub {
+            continue;
+        }
+        *token.kind_mut() = TokenKind::Add;
+        let mut updated_value = token.value().to_string();
+        if updated_value.starts_with('-') {
+            updated_value.remove(0);
+        } else {
+            updated_value.insert(0, '-')
+        }
+
+        let updated_value = Box::leak(updated_value.into_boxed_str());
+
+        token.set_value(updated_value);
+        string_handles.push(updated_value as &str as *const str as *mut str);
+    }
+    string_handles
+}
+
+// TODO: notice '-' as unary and binary op
 pub fn postfix_notation(
     tokens: Vec<TokenCapture>,
 ) -> Result<Vec<TokenCapture>, Box<dyn std::error::Error>> {
+    //let string_handles = set_minus(&mut tokens);
     let mut stack = Vec::<TokenCapture>::new();
     let mut queue = Vec::<TokenCapture>::new();
 

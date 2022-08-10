@@ -114,11 +114,11 @@ pub fn input_field(pos: Vec2, size: Vec2, id: u64, text_color: Color) -> &'stati
                 field.insert_idx -= 1;
             }
         } else if field.text.len() <= (size.x / (21. * 0.5)).ceil() as usize
-            && (('a'..='z').contains(&pressed)
+            && (('a'..='z').contains(&pressed.to_ascii_lowercase())
                 || ('0'..='9').contains(&pressed)
                 || ".+*/-() ".contains(pressed))
         {
-            field.text.insert(field.insert_idx, pressed);
+            field.text.insert(field.insert_idx, pressed.to_ascii_lowercase());
             field.insert_idx += 1;
         }
     }
